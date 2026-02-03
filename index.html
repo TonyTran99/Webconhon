@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Đối Chiếu Đặt Cược 36 Con</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .zoom-container {
+            overflow: hidden;
+            cursor: zoom-in;
+        }
+        .zoom-container img {
+            transition: transform 0.3s ease;
+            width: 100%;
+        }
+        .zoom-container:hover img {
+            transform: scale(2); /* Zoom 2x khi di chuột */
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen overflow-hidden">
+
+    <div id="app" class="h-full flex flex-col">
+        <header class="bg-blue-800 text-white p-4 shadow-md flex justify-between items-center z-10">
+            <h1 class="text-xl font-bold uppercase"><i class="fa-solid fa-scale-balanced mr-2"></i> Đối Chiếu Biên Lai & Ghi Cược</h1>
+            <div class="text-sm italic">MVP Version 1.0</div>
+        </header>
+
+        <div class="flex-1 flex overflow-hidden">
+            
+            <div class="w-1/2 bg-gray-800 p-4 flex flex-col border-r border-gray-600 relative">
+                <div v-if="!imageSrc" class="flex-1 border-2 border-dashed border-gray-500 rounded-xl flex flex-col items-center justify-center text-gray-400">
+                    <i class="fa-solid fa-cloud-arrow-up text-6xl mb-4"></i>
+                    <p class="mb-4">Kéo thả ảnh biên lai hoặc bấm vào đây</p>
+                    <input type="file" @change="handleFileUpload" accept="image/*" class="hidden" id="fileInput">
+                    <label for="fileInput" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg cursor-pointer font-bold">
+                        Chọn Ảnh
+                    </label>
+                </div>
+
+                <div v-else class="flex-1 relative bg-black rounded-lg overflow-auto flex items-center justify-center">
+                    <div class="zoom-container w-full" @mousemove="handleZoom" @mouseleave="resetZoom">
+                        <img :src="imageSrc" ref="receiptImg" alt="Receipt">
+                    </div>
+                    <button @click="resetApp" class="absolute top-4 right-4 bg-red-600 text-white p-2 rounded-full hover:bg-red-700 shadow-lg" title="Xóa ảnh">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="w-1/2 bg-white flex flex-col">
+                <div class="p-4 border-b bg-gray-50">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase">Khách hàng (Sender)</label>
+                            <input v-model="senderName" class="w-full p-2 border rounded font-bold text-gray-800" placeholder="VD: Nguyen Van A">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase">Tổng Biên Lai (VNĐ)</label>
+                            <input type="number" v-model="receiptTotal" class="w-full p-2 border rounded font-bold text-red-600 text-right text-lg" placeholder="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-4">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-100 text-gray-600 sticky top-0">
+                            <tr>
+                                <th class="p-2 text-left">Mã</th>
+                                <th class="p-2 text-left">Con Vật</th>
+                                <th class="p-2 text-right">Tiền (k)</th>
+                                <th class="p-2 text-right">Thành tiền</th>
+                                <th class="p-2 text-center">Xóa</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(bet, index) in bets" :key="index" class="border-b hover:bg-blue-50">
+                                <td class="p-2 font-bold text-blue-600">{{ bet.code }}</td>
+                                <td class="p-2 font-medium">{{ bet.name }}</td>
+                                <td class="p-2 text-right">
+                                    <input type="number" v-model="bet.amount_k" class="w-16 border rounded text-right p-1 font-mono">
+                                </td>
+                                <td class="p-2 text-right font-mono">{{ (bet.amount_k * 1000).toLocaleString() }}</td>
+                                <td class="p-2 text-center">
+                                    <button @click="removeBet(index)" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-times"></i></button>
+                                </td>
+                            </tr>
+                            <tr v-if="bets.length === 0">
+                                <td colspan="5" class="p-8 text-center text-gray-400 italic">Chưa có dữ liệu đặt cược...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="p-2 bg-gray-100 border-t">
+                    <p class="text-xs font-bold text-gray-500 mb-2 uppercase ml-2">Thêm nhanh (Click để chọn):</p>
+                    <div class="grid grid-cols-9 gap-1 h-32 overflow-y-auto px-2">
+                        <button v-for="animal in animalDb" :key="animal.code" @click="addBet(animal)" 
+                            class="bg-white border hover:bg-blue-600 hover:text-white rounded p-1 flex flex-col items-center justify-center transition shadow-sm text-[10px]">
+                            <span class="font-bold text-xs">{{ animal.code }}</span>
+                            <span class="truncate w-full text-center leading-tight">{{ animal.common }}</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="p-4 border-t bg-white shadow-up z-10">
+                    <div class="flex justify-between items-end mb-4">
+                        <div class="text-sm text-gray-600">
+                            Tổng cược trích xuất: <span class="font-bold">{{ sumBets.toLocaleString() }} đ</span>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs text-gray-500 uppercase font-bold">Chênh lệch</div>
+                            <div class="text-3xl font-black" :class="diff === 0 ? 'text-green-600' : 'text-red-600'">
+                                {{ diff > 0 ? '+' : '' }}{{ diff.toLocaleString() }} đ
+                            </div>
+                            <div class="text-xs font-bold mt-1" :class="diff === 0 ? 'text-green-600' : 'text-red-600'">
+                                {{ diff === 0 ? '✓ KHỚP LỆNH' : '⚠ CẦN KIỂM TRA LẠI' }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                         <button @click="simulateOCR" v-if="imageSrc && bets.length === 0" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 rounded-lg">
+                            <i class="fa-solid fa-magic mr-2"></i> Quét AI (Test)
+                        </button>
+                         <button @click="downloadCSV" :disabled="diff !== 0" 
+                            class="col-span-2 bg-blue-700 hover:bg-blue-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-3 rounded-lg text-lg transition shadow-lg">
+                            <i class="fa-solid fa-file-excel mr-2"></i> LƯU & XUẤT FILE EXCEL
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    imageSrc: null,
+                    senderName: '',
+                    receiptTotal: 0,
+                    bets: [],
+                    // Database 36 con vật (Trích xuất từ ảnh của bạn)
+                    animalDb: [
+                        {code:'01', alias:'Chiếm Khôi', common:'Cá Trắng'}, {code:'02', alias:'Bản Quế', common:'Con Ốc'},
+                        {code:'03', alias:'Vinh Sanh', common:'Con Ngỗng'}, {code:'04', alias:'Yên Thế', common:'Con Công'},
+                        {code:'05', alias:'Chí Cao', common:'Con Trùng'}, {code:'06', alias:'Phú Quí', common:'Con Gà'},
+                        {code:'07', alias:'Hữu Dụng', common:'Con Heo'}, {code:'08', alias:'Thái Bình', common:'Con Dương'},
+                        {code:'09', alias:'Thành Thang', common:'Con Trâu'}, {code:'10', alias:'Giang Từ', common:'Rồng Bay'},
+                        {code:'11', alias:'Hà Bao', common:'Con Chó'}, {code:'12', alias:'Thanh Liêm', common:'Con Ngựa'},
+                        {code:'13', alias:'Hòa Bình', common:'Con Voi'}, {code:'14', alias:'Tư Hiền', common:'Con Mèo'},
+                        {code:'15', alias:'An Khánh', common:'Con Chuột'}, {code:'16', alias:'Nhật Sơn', common:'Con Ong'},
+                        {code:'17', alias:'Chỉ Đắc', common:'Hạc Tiên'}, {code:'18', alias:'Khổng Minh', common:'Con Cọp'},
+                        {code:'19', alias:'Vãng Sanh', common:'Con Bướm'}, {code:'20', alias:'Nguyên Cát', common:'Con Rùa'},
+                        {code:'21', alias:'Thượng Chiêu', common:'Con Én'}, {code:'22', alias:'Song Đồng', common:'Con Cu'},
+                        {code:'23', alias:'Phước Tôn', common:'Con Khỉ'}, {code:'24', alias:'Lưu Bị', common:'Con Ếch'},
+                        {code:'25', alias:'Thượng Cầm', common:'Con Ó'}, {code:'26', alias:'Hạ Động', common:'Rồng Nước'},
+                        {code:'27', alias:'Cao Sỹ', common:'Con Quy'}, {code:'28', alias:'Bạch Lợi', common:'Con Gà'},
+                        {code:'29', alias:'Trúc Thanh', common:'Con Lươn'}, {code:'30', alias:'Tỉnh Lợi', common:'Cá Đỏ'},
+                        {code:'31', alias:'Cẩm Chương', common:'Con Tôm'}, {code:'32', alias:'Phùng Xuân', common:'Con Rắn'},
+                        {code:'33', alias:'Tây Phương', common:'Con Nhện'}, {code:'34', alias:'Thuận Lợi', common:'Con Nai'},
+                        {code:'35', alias:'Vĩnh Thái', common:'Con Dê'}, {code:'36', alias:'An Sỹ', common:'Con Yêu'}
+                    ]
+                }
+            },
+            computed: {
+                sumBets() {
+                    return this.bets.reduce((acc, bet) => acc + (bet.amount_k || 0) * 1000, 0);
+                },
+                diff() {
+                    return (this.receiptTotal || 0) - this.sumBets;
+                }
+            },
+            methods: {
+                handleFileUpload(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        this.imageSrc = URL.createObjectURL(file);
+                        // Reset form
+                        this.senderName = '';
+                        this.receiptTotal = 0;
+                        this.bets = [];
+                    }
+                },
+                handleZoom(e) {
+                    const img = this.$refs.receiptImg;
+                    const { left, top, width, height } = e.target.getBoundingClientRect();
+                    const x = (e.clientX - left) / width * 100;
+                    const y = (e.clientY - top) / height * 100;
+                    img.style.transformOrigin = `${x}% ${y}%`;
+                    img.style.transform = "scale(2.5)";
+                },
+                resetZoom() {
+                    this.$refs.receiptImg.style.transform = "scale(1)";
+                },
+                addBet(animal) {
+                    // Mặc định thêm 50k
+                    this.bets.push({
+                        code: animal.code,
+                        name: animal.common,
+                        amount_k: 0
+                    });
+                },
+                removeBet(index) {
+                    this.bets.splice(index, 1);
+                },
+                resetApp() {
+                    this.imageSrc = null;
+                },
+                simulateOCR() {
+                    // Hàm này giả lập việc gọi API AI để bóc tách dữ liệu
+                    // Dùng để test giao diện
+                    this.senderName = "NGUYEN VAN A";
+                    this.receiptTotal = 200000;
+                    this.bets = [
+                        {code: '22', name: 'Con Cu', amount_k: 50},
+                        {code: '01', name: 'Cá Trắng', amount_k: 100},
+                        {code: '30', name: 'Cá Đỏ', amount_k: 50}
+                    ];
+                    alert("Đã giả lập bóc tách dữ liệu từ ảnh thành công!");
+                },
+                downloadCSV() {
+                    // Logic xuất file CSV để upload lên Google Drive thủ công hoặc lưu trữ
+                    let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // UTF-8 BOM
+                    csvContent += "Transaction_ID,Sender,Animal_Code,Animal_Name,Amount_K,Total_Receipt\n";
+                    
+                    const txId = Date.now();
+                    this.bets.forEach(bet => {
+                        const row = `${txId},"${this.senderName}",${bet.code},"${bet.name}",${bet.amount_k},${this.receiptTotal}`;
+                        csvContent += row + "\n";
+                    });
+
+                    const encodedUri = encodeURI(csvContent);
+                    const link = document.createElement("a");
+                    link.setAttribute("href", encodedUri);
+                    link.setAttribute("download", `bets_${this.senderName}_${txId}.csv`);
+                    document.body.appendChild(link);
+                    link.click();
+                    
+                    alert("Đã tải xuống file Excel (CSV) thành công! Bạn có thể kéo file này vào Google Drive.");
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
