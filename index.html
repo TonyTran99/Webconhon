@@ -3,162 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Đối Soát V7 - Gemini AI</title>
+    <title>Hệ Thống Đối Soát V8 (Bản Chuẩn)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f8fafc; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f1f5f9; }
         .scroller::-webkit-scrollbar { width: 8px; }
         .scroller::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
         .loader {
-            border: 3px solid #f3f3f3; border-top: 3px solid #6366f1; border-radius: 50%;
-            width: 24px; height: 24px; animation: spin 1s linear infinite;
+            border: 4px solid #f3f3f3; border-top: 4px solid #4f46e5; border-radius: 50%;
+            width: 30px; height: 30px; animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden text-slate-800">
 
-    <header class="bg-indigo-900 text-white px-6 py-3 shadow-lg flex justify-between items-center z-30">
+    <header class="bg-indigo-900 text-white px-4 py-3 shadow-lg flex justify-between items-center z-50">
         <div class="flex items-center gap-3">
-            <div class="bg-white/10 p-2 rounded-lg backdrop-blur-sm"><i class="fa-solid fa-brain text-yellow-400 text-xl"></i></div>
+            <div class="bg-white/10 p-2 rounded"><i class="fa-solid fa-robot text-yellow-400 text-xl"></i></div>
             <div>
-                <h1 class="text-lg font-bold uppercase leading-none tracking-wide">Đối Soát Thông Minh V7</h1>
-                <div class="text-[11px] text-indigo-200 mt-1">Powered by Google Gemini 1.5 Flash</div>
+                <h1 class="text-lg font-bold uppercase leading-none">Đối Soát Biên Lai V8</h1>
+                <div class="text-[11px] text-indigo-200 mt-1">Dữ liệu chuẩn 36 con theo ảnh gốc</div>
             </div>
         </div>
         
-        <div class="flex items-center gap-2 bg-indigo-800 p-1 pl-3 rounded-lg border border-indigo-700">
-            <i class="fa-solid fa-key text-xs text-indigo-400"></i>
-            <input v-model="apiKey" type="password" placeholder="Dán Google API Key vào đây..." class="bg-transparent border-none text-xs text-white placeholder-indigo-400 focus:outline-none w-48">
+        <div class="flex items-center gap-2 bg-indigo-800 p-1.5 rounded border border-indigo-600">
+            <i class="fa-solid fa-key text-xs text-indigo-300 ml-2"></i>
+            <input v-model="apiKey" type="password" placeholder="Dán khoá API (AIza...) vào đây" 
+                class="bg-transparent border-none text-xs text-white placeholder-indigo-400 focus:outline-none w-64 px-2">
+            <div v-if="apiKey && apiKey.startsWith('AIza')" class="text-green-400 text-xs px-2"><i class="fa-solid fa-check"></i></div>
         </div>
     </header>
 
     <div id="app" class="flex-1 flex overflow-hidden">
         
         <div class="w-5/12 bg-slate-900 flex flex-col relative border-r border-slate-700">
-            <div class="flex-1 overflow-auto scroller flex items-start justify-center p-4 bg-slate-800/50">
-                <div v-if="!imageSrc" class="mt-20 border-2 border-dashed border-slate-600 rounded-xl p-10 text-center text-slate-400 hover:bg-slate-800 transition cursor-pointer relative">
-                    <i class="fa-solid fa-file-invoice-dollar text-5xl mb-4 opacity-50"></i>
-                    <p class="font-bold">Tải ảnh biên lai</p>
-                    <p class="text-xs mt-2 opacity-70">Hỗ trợ ảnh dài, ảnh chụp màn hình</p>
+            <div class="flex-1 overflow-auto scroller flex items-center justify-center p-4 bg-slate-800/50">
+                <div v-if="!imageSrc" class="text-center border-2 border-dashed border-slate-600 rounded-xl p-10 hover:bg-slate-800 transition cursor-pointer relative group">
+                    <i class="fa-solid fa-cloud-arrow-up text-5xl text-slate-500 mb-4 group-hover:text-indigo-400 transition"></i>
+                    <p class="text-slate-400 font-bold group-hover:text-white">Tải ảnh biên lai lên</p>
                     <input type="file" @change="handleFileUpload" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer">
                 </div>
-                <img v-else :src="imageSrc" class="max-w-full rounded-lg shadow-2xl border border-slate-600 cursor-zoom-in hover:scale-105 transition duration-300" onclick="this.classList.toggle('scale-[2]')" alt="Receipt">
+                <img v-else :src="imageSrc" class="max-w-full max-h-full rounded shadow-2xl border border-slate-600" alt="Receipt">
             </div>
             
-            <div class="p-3 bg-slate-900 border-t border-slate-700 flex justify-between items-center text-white text-xs">
-                <span><i class="fa-solid fa-info-circle mr-1"></i> Zoom: Click vào ảnh</span>
-                <button @click="resetApp" class="hover:text-red-400 transition"><i class="fa-solid fa-trash mr-1"></i> Xóa ảnh</button>
+            <div class="p-2 bg-slate-950 text-center">
+                <button @click="resetApp" class="text-xs text-red-400 hover:text-red-300"><i class="fa-solid fa-trash mr-1"></i> Xóa ảnh & Làm lại</button>
             </div>
         </div>
 
         <div class="w-7/12 bg-white flex flex-col relative">
             
             <div v-if="isProcessing" class="absolute inset-0 z-50 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center">
-                <div class="loader mb-4 w-12 h-12 border-4 border-t-indigo-600"></div>
-                <h3 class="text-lg font-bold text-indigo-900">AI đang phân tích biên lai...</h3>
-                <p class="text-sm text-slate-500 mt-2 animate-pulse">Đang trích xuất tên, số tiền và luận giải lô đề...</p>
+                <div class="loader mb-4"></div>
+                <h3 class="text-lg font-bold text-indigo-900">AI Đang Xử Lý...</h3>
+                <p class="text-sm text-slate-500">Đang đọc biên lai và đối chiếu 36 con vật</p>
+            </div>
+
+            <div v-if="errorMessage" class="absolute top-4 left-4 right-4 z-50 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative shadow-lg">
+                <strong class="font-bold">Lỗi: </strong>
+                <span class="block sm:inline">{{ errorMessage }}</span>
+                <span class="absolute top-0 bottom-0 right-0 px-4 py-3" @click="errorMessage = ''">
+                    <i class="fa-solid fa-xmark cursor-pointer"></i>
+                </span>
             </div>
 
             <div class="flex-1 overflow-y-auto scroller p-6 pb-24">
                 
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 mb-6 overflow-hidden group hover:border-indigo-300 transition">
-                    <div class="bg-slate-50 border-b px-5 py-3 flex justify-between items-center">
-                        <h3 class="font-bold text-sm text-slate-700 uppercase flex items-center gap-2">
-                            <span class="bg-blue-100 text-blue-700 w-6 h-6 flex items-center justify-center rounded-full text-xs">1</span>
-                            Thông tin giao dịch
-                        </h3>
-                        <div v-if="isValidHeader" class="text-green-600 text-xs font-bold flex items-center gap-1">
-                            <i class="fa-solid fa-check-circle"></i> Đầy đủ
-                        </div>
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 mb-6">
+                    <div class="bg-slate-50 border-b px-4 py-2 flex justify-between items-center">
+                        <h3 class="font-bold text-sm text-slate-700 uppercase">1. Thông tin giao dịch</h3>
+                        <div v-if="form.sender_name && form.total_amount" class="text-green-600 text-xs font-bold"><i class="fa-solid fa-check"></i> Đã nhận diện</div>
                     </div>
-                    <div class="p-5 grid grid-cols-2 gap-5">
+                    <div class="p-4 grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Người chuyển (Sender)</label>
-                            <input v-model="form.sender_name" class="w-full p-2.5 bg-slate-50 border rounded-lg text-sm font-semibold text-slate-800 focus:bg-white focus:border-indigo-500 outline-none transition" placeholder="...">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Người chuyển</label>
+                            <input v-model="form.sender_name" class="w-full p-2 border rounded text-sm font-bold text-slate-800 focus:border-indigo-500 outline-none" placeholder="...">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Thời gian (Date)</label>
-                            <input v-model="form.transaction_date" type="datetime-local" class="w-full p-2.5 bg-slate-50 border rounded-lg text-sm focus:bg-white focus:border-indigo-500 outline-none transition">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Ngày giờ</label>
+                            <input v-model="form.transaction_date" type="datetime-local" class="w-full p-2 border rounded text-sm outline-none">
                         </div>
                         <div class="col-span-2">
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Tổng tiền thực chuyển</label>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Tổng tiền biên lai</label>
                             <div class="relative">
                                 <input type="text" :value="formatCurrency(form.total_amount)" @input="updateTotal" 
-                                    class="w-full p-3 pl-4 border-2 border-indigo-100 bg-indigo-50/50 rounded-xl text-xl font-bold text-indigo-700 text-right pr-12 focus:border-indigo-500 outline-none transition" placeholder="0">
-                                <span class="absolute right-4 top-4 text-xs font-bold text-indigo-400">VNĐ</span>
+                                    class="w-full p-3 border-2 border-indigo-100 bg-indigo-50 rounded-lg text-xl font-bold text-indigo-700 text-right pr-10 focus:border-indigo-500 outline-none" placeholder="0">
+                                <span class="absolute right-3 top-4 text-xs font-bold text-indigo-400">VNĐ</span>
                             </div>
                         </div>
                         
-                        <div class="col-span-2 bg-slate-50 rounded-lg p-3 border border-dashed border-slate-300 flex gap-3 text-xs">
-                            <div class="flex-1">
-                                <label class="block text-[9px] font-bold text-slate-400 uppercase">Người nhận</label>
-                                <input v-model="form.receiver_name" class="w-full bg-transparent border-b border-slate-200 focus:border-indigo-500 outline-none py-1 font-medium" placeholder="...">
-                            </div>
-                            <div class="flex-1">
-                                <label class="block text-[9px] font-bold text-slate-400 uppercase">Ngân hàng</label>
-                                <input v-model="form.receiver_bank" class="w-full bg-transparent border-b border-slate-200 focus:border-indigo-500 outline-none py-1" placeholder="...">
-                            </div>
-                            <div class="flex-1">
-                                <label class="block text-[9px] font-bold text-slate-400 uppercase">Số TK</label>
-                                <input v-model="form.receiver_account" class="w-full bg-transparent border-b border-slate-200 focus:border-indigo-500 outline-none py-1 font-mono" placeholder="...">
-                            </div>
+                        <div class="col-span-2 grid grid-cols-3 gap-2 mt-2">
+                            <input v-model="form.receiver_name" class="p-2 border rounded text-xs" placeholder="Tên người nhận">
+                            <input v-model="form.receiver_bank" class="p-2 border rounded text-xs" placeholder="Ngân hàng">
+                            <input v-model="form.receiver_account" class="p-2 border rounded text-xs" placeholder="Số tài khoản">
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 mb-6 overflow-hidden">
-                    <div class="bg-gradient-to-r from-indigo-50 to-white border-b px-5 py-3 flex justify-between items-center">
-                        <h3 class="font-bold text-sm text-indigo-900 uppercase flex items-center gap-2">
-                            <span class="bg-indigo-600 text-white w-6 h-6 flex items-center justify-center rounded-full text-xs">2</span>
-                            Chi tiết đặt cược
-                        </h3>
-                        <div class="text-xs font-bold text-indigo-600 bg-indigo-100 px-2 py-1 rounded">
-                            Đã tìm thấy: {{ form.bets.length }} mã
-                        </div>
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 mb-6">
+                    <div class="bg-indigo-50 border-b px-4 py-2 flex justify-between items-center">
+                        <h3 class="font-bold text-sm text-indigo-900 uppercase">2. Chi tiết cược</h3>
+                        <span class="text-xs font-bold bg-white text-indigo-600 px-2 py-0.5 rounded border">SL: {{ form.bets.length }}</span>
                     </div>
 
                     <table class="w-full text-sm">
                         <thead class="bg-slate-50 text-slate-500 text-[10px] uppercase border-b">
                             <tr>
-                                <th class="p-3 text-left pl-5">Con Vật</th>
-                                <th class="p-3 text-right">Tiền cược (k)</th>
+                                <th class="p-3 text-left">Mã / Tên</th>
+                                <th class="p-3 text-right">Tiền (k)</th>
                                 <th class="p-3 text-right">Thành tiền</th>
                                 <th class="p-3 text-center w-10"></th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
-                            <tr v-for="(bet, index) in form.bets" :key="index" class="hover:bg-indigo-50/50 transition group">
-                                <td class="p-3 pl-5">
-                                    <div class="flex items-center gap-3">
-                                        <span class="font-mono font-bold text-lg text-indigo-600 w-8 text-center bg-indigo-50 rounded p-1 border border-indigo-100">{{ bet.code }}</span>
+                            <tr v-for="(bet, index) in form.bets" :key="index" class="hover:bg-slate-50">
+                                <td class="p-3">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-indigo-700 w-6 text-center bg-indigo-100 rounded">{{ bet.code }}</span>
                                         <div>
                                             <div class="font-bold text-slate-700">{{ bet.common_name }}</div>
-                                            <div class="text-[10px] text-slate-400 italic">"{{ bet.matched_text }}"</div>
+                                            <div class="text-[10px] text-slate-400 italic">{{ bet.matched_text }}</div>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="p-3 text-right">
-                                    <input type="number" v-model="bet.amount_k" class="w-20 text-right p-1.5 border border-slate-200 rounded font-mono text-sm focus:border-indigo-500 focus:bg-white bg-transparent outline-none transition">
+                                    <input type="number" v-model="bet.amount_k" class="w-20 text-right p-1 border rounded bg-slate-50 focus:bg-white outline-none">
                                 </td>
-                                <td class="p-3 text-right font-mono font-medium text-slate-600">
+                                <td class="p-3 text-right font-mono text-slate-600">
                                     {{ (bet.amount_k * 1000).toLocaleString('vi-VN') }}
                                 </td>
                                 <td class="p-3 text-center">
-                                    <button @click="removeBet(index)" class="text-slate-300 hover:text-red-500 transition px-2"><i class="fa-solid fa-xmark"></i></button>
+                                    <button @click="removeBet(index)" class="text-slate-300 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
 
-                    <div class="p-4 bg-slate-50/50 border-t">
-                        <div class="text-[10px] font-bold text-slate-400 uppercase mb-2">Thêm thủ công (Nếu AI sót):</div>
-                        <div class="grid grid-cols-6 sm:grid-cols-9 gap-1.5 h-24 overflow-y-auto scroller pr-1">
+                    <div class="p-3 bg-slate-50 border-t">
+                        <div class="text-[10px] font-bold text-slate-400 uppercase mb-2">Thêm nhanh (Click chọn):</div>
+                        <div class="grid grid-cols-6 sm:grid-cols-9 gap-1 h-32 overflow-y-auto scroller pr-1">
                             <button v-for="animal in animalDb" :key="animal.code" @click="addBet(animal)" 
-                                class="bg-white border border-slate-200 hover:border-indigo-500 hover:bg-indigo-50 rounded p-1 flex flex-col items-center transition shadow-sm">
+                                class="bg-white border hover:border-indigo-500 hover:bg-indigo-100 rounded p-1 flex flex-col items-center transition shadow-sm">
                                 <span class="text-[10px] font-bold text-indigo-700">{{ animal.code }}</span>
                                 <span class="text-[9px] text-slate-500 truncate w-full text-center">{{ animal.common }}</span>
                             </button>
@@ -168,29 +156,23 @@
 
             </div>
 
-            <div class="absolute bottom-0 left-0 right-0 bg-white border-t p-4 shadow-[0_-5px_20px_rgba(0,0,0,0.05)] z-40">
-                <div class="flex items-center gap-6">
-                    <div class="flex-1">
-                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Trạng thái đối chiếu</div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-3xl font-black tracking-tight" :class="diff === 0 ? 'text-emerald-600' : 'text-rose-600'">
-                                {{ diff > 0 ? '+' : '' }}{{ diff.toLocaleString('vi-VN') }} ₫
-                            </span>
-                            <div v-if="diff === 0" class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full uppercase flex items-center gap-1">
-                                <i class="fa-solid fa-check"></i> Khớp lệnh
-                            </div>
-                            <div v-else class="px-3 py-1 bg-rose-100 text-rose-700 text-xs font-bold rounded-full uppercase flex items-center gap-1">
-                                <i class="fa-solid fa-triangle-exclamation"></i> Lệch
-                            </div>
-                        </div>
+            <div class="absolute bottom-0 left-0 right-0 bg-white border-t p-4 shadow-lg z-40 flex items-center gap-4">
+                <div class="flex-1">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase">Chênh lệch</div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-2xl font-black" :class="diff === 0 ? 'text-green-600' : 'text-red-600'">
+                            {{ diff > 0 ? '+' : '' }}{{ diff.toLocaleString('vi-VN') }} ₫
+                        </span>
+                        <span v-if="diff === 0" class="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded uppercase">Khớp</span>
+                        <span v-else class="px-2 py-0.5 bg-red-100 text-red-700 text-[10px] font-bold rounded uppercase">Lệch</span>
                     </div>
-                    
-                    <button @click="downloadExcel" :disabled="diff !== 0" 
-                        class="bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-8 py-4 rounded-xl font-bold shadow-lg shadow-indigo-200 transition-all transform active:scale-95 flex items-center gap-3 text-sm">
-                        <span>XÁC NHẬN & TẢI VỀ</span>
-                        <i class="fa-solid fa-file-export text-lg"></i>
-                    </button>
                 </div>
+                
+                <button @click="downloadExcel" :disabled="diff !== 0" 
+                    class="bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-bold shadow-lg transition-all flex items-center gap-2">
+                    <span>XÁC NHẬN</span>
+                    <i class="fa-solid fa-file-arrow-down"></i>
+                </button>
             </div>
 
         </div>
@@ -199,26 +181,44 @@
     <script>
         const { createApp } = Vue;
 
-        // DANH SÁCH 36 CON (Reference cho AI và UI)
+        // DỮ LIỆU CHUẨN HOÁ TỪ ẢNH BẠN GỬI (ĐÃ KIỂM TRA LẠI)
         const ANIMAL_DB = [
-            {code:'01', common:'Cá Trắng', alias:'Chiếm Khôi'}, {code:'02', common:'Con Ốc', alias:'Bản Quế'},
-            {code:'03', common:'Con Ngỗng', alias:'Vinh Sanh'}, {code:'04', common:'Con Công', alias:'Yên Thế'},
-            {code:'05', common:'Con Trùng', alias:'Chí Cao'}, {code:'06', common:'Con Gà', alias:'Phú Quí'},
-            {code:'07', common:'Con Heo', alias:'Hữu Dụng'}, {code:'08', common:'Con Dương', alias:'Thái Bình'},
-            {code:'09', common:'Con Trâu', alias:'Thành Thang'}, {code:'10', common:'Rồng Bay', alias:'Giang Từ'},
-            {code:'11', common:'Con Chó', alias:'Hà Bao'}, {code:'12', common:'Con Ngựa', alias:'Thanh Liêm'},
-            {code:'13', common:'Con Voi', alias:'Hòa Bình'}, {code:'14', common:'Con Mèo', alias:'Tư Hiền'},
-            {code:'15', common:'Con Chuột', alias:'An Khánh'}, {code:'16', common:'Con Ong', alias:'Nhật Sơn'},
-            {code:'17', common:'Hạc Tiên', alias:'Chỉ Đắc'}, {code:'18', common:'Con Cọp', alias:'Khổng Minh'},
-            {code:'19', common:'Con Bướm', alias:'Vãng Sanh'}, {code:'20', common:'Con Rùa', alias:'Nguyên Cát'},
-            {code:'21', common:'Con Én', alias:'Thượng Chiêu'}, {code:'22', common:'Con Cu', alias:'Song Đồng'},
-            {code:'23', common:'Con Khỉ', alias:'Phước Tôn'}, {code:'24', common:'Con Ếch', alias:'Lưu Bị'},
-            {code:'25', common:'Con Ó', alias:'Thượng Cầm'}, {code:'26', common:'Rồng Nước', alias:'Hạ Động'},
-            {code:'27', common:'Con Quy', alias:'Cao Sỹ'}, {code:'28', common:'Con Gà', alias:'Bạch Lợi'},
-            {code:'29', common:'Con Lươn', alias:'Trúc Thanh'}, {code:'30', common:'Cá Đỏ', alias:'Tỉnh Lợi'},
-            {code:'31', common:'Con Tôm', alias:'Cẩm Chương'}, {code:'32', common:'Con Rắn', alias:'Phùng Xuân'},
-            {code:'33', common:'Con Nhện', alias:'Tây Phương'}, {code:'34', common:'Con Nai', alias:'Thuận Lợi'},
-            {code:'35', common:'Con Dê', alias:'Vĩnh Thái'}, {code:'36', common:'Con Yêu', alias:'An Sỹ'}
+            {code:'01', alias:'Chiếm Khôi', common:'Cá Trắng', sub:'05'},
+            {code:'02', alias:'Bản Quế', common:'Con Ốc', sub:'16'},
+            {code:'03', alias:'Vinh Sanh', common:'Con Ngỗng', sub:'32'},
+            {code:'04', alias:'Phùng Xuân', common:'Con Công', sub:'12'},
+            {code:'05', alias:'Chí Cao', common:'Con Trùng', sub:'01'},
+            {code:'06', alias:'Khôn Sơn', common:'Con Cọp', sub:'17'},
+            {code:'07', alias:'Chánh Thuận', common:'Con Heo', sub:'24'},
+            {code:'08', alias:'Nguyệt Bửu', common:'Con Thỏ', sub:'20'},
+            {code:'09', alias:'Hớn Vân', common:'Con Trâu', sub:'33'},
+            {code:'10', alias:'Giang Từ', common:'Rồng Bay', sub:'18'},
+            {code:'11', alias:'Phước Tôn', common:'Con Chó', sub:'15'},
+            {code:'12', alias:'Quang Minh', common:'Con Ngựa', sub:'04'},
+            {code:'13', alias:'Hữu Tài', common:'Con Voi', sub:'14'},
+            {code:'14', alias:'Chỉ Đắc', common:'Con Mèo', sub:'13'},
+            {code:'15', alias:'Tất Khắc', common:'Con Chuột', sub:'11'},
+            {code:'16', alias:'Mậu Lâm', common:'Con Ong', sub:'02'},
+            {code:'17', alias:'Trọng Tiên', common:'Con Hạc', sub:'06'},
+            {code:'18', alias:'Thiên Thân', common:'Kỳ Lân', sub:'10'},
+            {code:'19', alias:'Cán Ngọc', common:'Con Bướm', sub:'27'},
+            {code:'20', alias:'Trân Châu', common:'Hòn Đá', sub:'08'},
+            {code:'21', alias:'Thượng Chiêu', common:'Con Én', sub:'22'},
+            {code:'22', alias:'Song Đồng', common:'Con Cu', sub:'21'},
+            {code:'23', alias:'Tam Hòe', common:'Con Khỉ', sub:'30'},
+            {code:'24', alias:'Hiệp Hải', common:'Con Ếch', sub:'07'},
+            {code:'25', alias:'Cửu Quan', common:'Con Quạ', sub:'35'},
+            {code:'26', alias:'Thái Bình', common:'Rồng Nằm', sub:'31'},
+            {code:'27', alias:'Hỏa Diệm', common:'Con Rùa', sub:'19'},
+            {code:'28', alias:'Nhựt Thăng', common:'Con Gà', sub:'29'},
+            {code:'29', alias:'Địa Lương', common:'Con Lươn', sub:'28'},
+            {code:'30', alias:'Tỉnh Lợi', common:'Cá Đỏ', sub:'23'},
+            {code:'31', alias:'Trường Thọ', common:'Con Tôm', sub:'26'},
+            {code:'32', alias:'Vạn Kim', common:'Con Rắn', sub:'03'},
+            {code:'33', alias:'Thanh Tiền', common:'Con Nhện', sub:'09'},
+            {code:'34', alias:'Nguyên Kiết', common:'Con Nai', sub:'36'},
+            {code:'35', alias:'Nhứt Phẩm', common:'Con Dê', sub:'25'},
+            {code:'36', alias:'An Sỹ', common:'Con Yêu', sub:'34'}
         ];
 
         createApp({
@@ -227,6 +227,7 @@
                     apiKey: localStorage.getItem('gemini_api_key') || '',
                     imageSrc: null,
                     isProcessing: false,
+                    errorMessage: '',
                     animalDb: ANIMAL_DB,
                     form: {
                         sender_name: '', transaction_date: '', total_amount: 0,
@@ -236,96 +237,117 @@
                 }
             },
             watch: {
-                apiKey(newVal) { localStorage.setItem('gemini_api_key', newVal); }
+                apiKey(newVal) { 
+                    if(newVal) localStorage.setItem('gemini_api_key', newVal.trim()); 
+                }
             },
             computed: {
                 sumBets() { return this.form.bets.reduce((acc, b) => acc + (b.amount_k || 0) * 1000, 0); },
-                diff() { return (this.form.total_amount || 0) - this.sumBets; },
-                isValidHeader() { return this.form.sender_name && this.form.total_amount > 0; }
+                diff() { return (this.form.total_amount || 0) - this.sumBets; }
             },
             methods: {
                 async handleFileUpload(e) {
                     const file = e.target.files[0];
                     if(!file) return;
-                    if(!this.apiKey) return alert("Vui lòng nhập Google API Key trước!");
+                    
+                    this.errorMessage = ''; // Reset lỗi
+                    
+                    // Kiểm tra Key
+                    if(!this.apiKey || !this.apiKey.trim().startsWith('AIza')) {
+                        this.errorMessage = "Khoá API chưa đúng. Vui lòng nhập Key bắt đầu bằng 'AIza' vào ô phía trên.";
+                        return;
+                    }
 
                     this.imageSrc = URL.createObjectURL(file);
                     this.isProcessing = true;
                     
                     try {
-                        // 1. Convert Image to Base64
                         const base64Image = await this.fileToGenerativePart(file);
-                        
-                        // 2. Call Gemini API
                         await this.analyzeImage(base64Image);
-
                     } catch (error) {
-                        alert("Lỗi AI: " + error.message);
+                        console.error("Lỗi:", error);
+                        this.errorMessage = `Lỗi hệ thống: ${error.message}`;
                     } finally {
                         this.isProcessing = false;
                     }
                 },
 
                 async analyzeImage(imagePart) {
-                    // PROMPT THÔNG MINH
+                    // Prompt cực kỳ chi tiết để ép AI làm đúng
+                    const dbString = JSON.stringify(this.animalDb.map(a => `${a.code}/${a.sub} - ${a.alias} - ${a.common}`));
+                    
                     const promptText = `
-                    Bạn là trợ lý xử lý dữ liệu biên lai chuyển khoản ngân hàng Việt Nam.
-                    Nhiệm vụ: Trích xuất thông tin JSON từ hình ảnh biên lai.
+                    Hệ vai: Chuyên gia xử lý dữ liệu cá cược.
+                    Nhiệm vụ: Trích xuất JSON từ ảnh biên lai ngân hàng/tin nhắn.
                     
-                    Quy tắc xử lý nội dung cược (quan trọng):
-                    - Đọc phần nội dung chuyển khoản (message/note).
-                    - Tìm các con vật dựa trên danh sách 36 con sau (Code - Tên thường - Tên huý):
-                    ${JSON.stringify(this.animalDb.map(a => `${a.code}-${a.common}-${a.alias}`).join(', '))}
-                    - Nếu nội dung chứa tên thường hoặc tên huý hoặc số code, hãy map về đúng con vật.
-                    - Số tiền: "50" hoặc "50k" đều hiểu là 50 (đơn vị nghìn). Nếu "50000" thì chia 1000 thành 50.
+                    DỮ LIỆU THAM CHIẾU (Mã Chính / Số Phụ - Tên Huý - Tên Thường):
+                    ${dbString}
+
+                    QUY TẮC MATCHING (Bắt buộc):
+                    1. Đọc nội dung tin nhắn/biên lai (Message/Note).
+                    2. Tìm các con vật được đặt cược. Nếu thấy "số phụ" (ví dụ 05), phải map về "Code chính" (01).
+                    3. Tiền: "50", "50k", "50.000" đều là 50 (đơn vị nghìn).
                     
-                    Output JSON format (chỉ trả về JSON thuần, không markdown):
+                    OUTPUT JSON FORMAT (Chỉ trả về JSON, không markdown):
                     {
-                        "sender_name": "Tên người chuyển (viết hoa)",
-                        "transaction_date": "YYYY-MM-DDTHH:mm (nếu có)",
-                        "total_amount": Number (số nguyên, ví dụ 150000),
+                        "sender_name": "Tên người gửi (viết hoa)",
+                        "transaction_date": "YYYY-MM-DDTHH:mm",
+                        "total_amount": NUMBER (Ví dụ 150000),
                         "receiver_name": "Tên người nhận",
                         "receiver_bank": "Ngân hàng nhận",
                         "receiver_account": "Số TK nhận",
                         "bets": [
-                            {
-                                "code": "Mã con (01-36)",
-                                "common_name": "Tên thường",
-                                "matched_text": "Từ khoá tìm thấy trong ảnh",
-                                "amount_k": Number (đơn vị nghìn, vd 50)
-                            }
+                            { "code": "STRING (01-36)", "common_name": "STRING", "matched_text": "STRING", "amount_k": NUMBER }
                         ]
                     }
                     `;
 
-                    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.apiKey}`;
+                    // TẮT BỘ LỌC AN TOÀN (QUAN TRỌNG NHẤT)
+                    const safetySettings = [
+                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                    ];
+
+                    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.apiKey.trim()}`;
                     
                     const response = await fetch(url, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            contents: [{ parts: [{ text: promptText }, imagePart] }]
+                            contents: [{ parts: [{ text: promptText }, imagePart] }],
+                            safetySettings: safetySettings
                         })
                     });
 
-                    const data = await response.json();
-                    if(data.error) throw new Error(data.error.message);
+                    if (!response.ok) {
+                        const err = await response.json();
+                        throw new Error(err.error?.message || "Lỗi kết nối đến Google Server");
+                    }
 
-                    // Parse JSON response
-                    let textRes = data.candidates[0].content.parts[0].text;
-                    // Clean markdown code blocks if present
-                    textRes = textRes.replace(/```json/g, '').replace(/```/g, '').trim();
+                    const data = await response.json();
                     
-                    const result = JSON.parse(textRes);
+                    // Kiểm tra block
+                    if(!data.candidates || data.candidates.length === 0) {
+                        throw new Error("AI không trả về kết quả (Có thể do bộ lọc nội dung còn sót lại).");
+                    }
+
+                    let text = data.candidates[0].content.parts[0].text;
+                    text = text.replace(/```json/g, '').replace(/```/g, '').trim();
                     
-                    // Map data to Form
-                    this.form.sender_name = result.sender_name || '';
-                    this.form.transaction_date = result.transaction_date || new Date().toISOString().slice(0,16);
-                    this.form.total_amount = result.total_amount || 0;
-                    this.form.receiver_name = result.receiver_name || '';
-                    this.form.receiver_bank = result.receiver_bank || '';
-                    this.form.receiver_account = result.receiver_account || '';
-                    this.form.bets = result.bets || [];
+                    const result = JSON.parse(text);
+                    
+                    // Map vào Form
+                    this.form = {
+                        sender_name: result.sender_name || '',
+                        transaction_date: result.transaction_date || new Date().toISOString().slice(0,16),
+                        total_amount: result.total_amount || 0,
+                        receiver_name: result.receiver_name || '',
+                        receiver_bank: result.receiver_bank || '',
+                        receiver_account: result.receiver_account || '',
+                        bets: result.bets || []
+                    };
                 },
 
                 fileToGenerativePart(file) {
@@ -339,9 +361,9 @@
                     });
                 },
 
-                // UI Helpers
                 resetApp() {
                     this.imageSrc = null;
+                    this.errorMessage = '';
                     this.form = { sender_name: '', transaction_date: '', total_amount: 0, bets: [] };
                 },
                 formatCurrency(val) { return val ? val.toLocaleString('vi-VN') : ''; },
@@ -353,7 +375,6 @@
                     this.form.bets.push({ code: animal.code, common_name: animal.common, matched_text: 'Thủ công', amount_k: 0 });
                 },
                 removeBet(idx) { this.form.bets.splice(idx, 1); },
-                
                 downloadExcel() {
                     let csv = "\uFEFFNgay,NguoiChuyen,NguoiNhan,NganHang,SoTK,TongTien,Ma,ConVat,Tien(k),ThanhTien\n";
                     const d = this.form.transaction_date.replace('T', ' ');
@@ -364,7 +385,7 @@
                     const url = URL.createObjectURL(blob);
                     const link = document.createElement("a");
                     link.href = url;
-                    link.download = `BienLai_${this.form.sender_name}_${Date.now()}.csv`;
+                    link.download = `BienLai_${this.form.sender_name}.csv`;
                     link.click();
                 }
             }
