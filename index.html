@@ -3,340 +3,365 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Đối Chiếu - Giao Diện Dọc</title>
+    <title>Hệ Thống Đối Chiếu Chính Xác V4</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* Tùy chỉnh thanh cuộn cho mượt */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        
         body { font-family: 'Segoe UI', sans-serif; }
-        
-        /* Hiệu ứng zoom kính lúp */
-        .magnifier {
-            cursor: zoom-in;
-            transition: transform 0.2s;
-            transform-origin: top center;
-        }
-        .magnifier:active {
-            transform: scale(1.5); /* Click giữ để zoom */
-            cursor: grabbing;
-        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+        .zoom-img { transition: transform 0.2s; cursor: crosshair; width: 100%; }
+        /* Checkbox to hơn để dễ bấm */
+        input[type="checkbox"] { width: 1.2rem; height: 1.2rem; cursor: pointer; }
     </style>
 </head>
-<body class="bg-gray-100 h-screen flex flex-col overflow-hidden text-slate-800">
+<body class="bg-slate-200 h-screen overflow-hidden text-slate-800">
 
-    <header class="bg-blue-900 text-white px-4 py-3 shadow-md flex justify-between items-center z-30 shrink-0">
-        <div class="flex items-center gap-3">
-            <i class="fa-solid fa-mobile-screen text-2xl text-yellow-400"></i>
-            <div>
-                <h1 class="text-lg font-bold uppercase leading-tight">Xử Lý Biên Lai Mobile</h1>
-                <div class="text-[10px] opacity-80">Hỗ trợ ảnh dọc • Trích xuất full nội dung</div>
-            </div>
-        </div>
-        <div class="text-xs font-mono bg-blue-800 px-2 py-1 rounded">
-            v3.0.1
-        </div>
-    </header>
-
-    <div id="app" class="flex-1 flex overflow-hidden">
+    <div id="app" class="h-full flex flex-col">
         
-        <div class="w-5/12 bg-gray-800 border-r border-gray-600 flex flex-col relative shadow-inner">
-            <div class="bg-gray-900 text-gray-300 p-2 flex justify-between items-center text-xs shrink-0 z-10">
-                <span><i class="fa-regular fa-image mr-1"></i> Bản xem trước</span>
-                <div class="flex gap-2">
-                    <button @click="rotateImage" class="hover:text-white"><i class="fa-solid fa-rotate-right"></i> Xoay</button>
-                    <button @click="resetApp" class="hover:text-red-400"><i class="fa-solid fa-trash"></i> Xóa ảnh</button>
+        <header class="bg-slate-900 text-white px-4 py-2 shadow flex justify-between items-center z-20 shrink-0">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-shield-halved text-green-400 text-xl"></i>
+                <div>
+                    <h1 class="font-bold text-lg leading-none uppercase">Đối Soát Cược 36 Con</h1>
+                    <span class="text-[10px] text-slate-400">Chế độ kiểm tra nghiêm ngặt (Strict Mode)</span>
                 </div>
             </div>
+            <button @click="resetApp" class="bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-xs transition">
+                <i class="fa-solid fa-redo"></i> Reset
+            </button>
+        </header>
 
-            <div class="flex-1 overflow-y-auto overflow-x-hidden relative text-center p-4 custom-scrollbar bg-gray-700">
-                <div v-if="!imageSrc" class="h-full flex flex-col items-center justify-center border-2 border-dashed border-gray-500 rounded-lg opacity-50">
-                    <i class="fa-solid fa-cloud-arrow-up text-5xl mb-2"></i>
-                    <p>Kéo thả hoặc chọn ảnh biên lai</p>
-                    <input type="file" @change="handleFileUpload" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer">
-                </div>
-                
-                <img v-else :src="imageSrc" 
-                     :style="{ transform: `rotate(${rotation}deg)` }"
-                     class="magnifier max-w-full h-auto mx-auto shadow-2xl rounded-sm border border-gray-500" 
-                     alt="Receipt Image" 
-                     title="Click giữ chuột để phóng to">
-            </div>
-        </div>
-
-        <div class="w-7/12 bg-white flex flex-col h-full relative z-20">
+        <div class="flex-1 flex overflow-hidden">
             
-            <div class="flex-1 overflow-y-auto custom-scrollbar p-6 pb-32"> <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 shadow-sm">
-                    <h3 class="text-xs font-bold text-blue-800 uppercase mb-3 flex items-center">
-                        <i class="fa-solid fa-circle-info mr-2"></i> Thông tin giao dịch
-                    </h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="space-y-3">
-                            <div>
-                                <label class="block text-[11px] font-bold text-gray-500 uppercase">Họ tên khách (Người chuyển)</label>
-                                <input v-model="form.senderName" class="w-full p-2 text-sm border rounded focus:ring-2 focus:ring-blue-500 font-semibold" placeholder="VD: NGUYEN VAN A">
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-bold text-gray-500 uppercase">Ngày giờ chuyển</label>
-                                <input type="datetime-local" v-model="form.transDate" class="w-full p-2 text-sm border rounded focus:ring-2 focus:ring-blue-500">
-                            </div>
-                        </div>
-                        <div class="space-y-3">
-                            <div>
-                                <label class="block text-[11px] font-bold text-gray-500 uppercase">Tổng tiền thực chuyển</label>
-                                <div class="relative">
-                                    <input type="text" :value="formatCurrency(form.receiptTotal)" @input="updateTotal" class="w-full p-2 text-lg border border-red-200 bg-red-50 rounded focus:ring-2 focus:ring-red-500 font-bold text-red-600 text-right pr-8" placeholder="0">
-                                    <span class="absolute right-3 top-3 text-xs font-bold text-red-400">VNĐ</span>
-                                </div>
-                            </div>
-                            <div class="flex items-center justify-end h-full pt-4">
-                                <span v-if="diff === 0 && form.receiptTotal > 0" class="text-green-600 font-bold flex items-center text-sm bg-green-100 px-3 py-1 rounded-full border border-green-200">
-                                    <i class="fa-solid fa-check-circle mr-2"></i> Khớp lệnh
-                                </span>
-                                <span v-else-if="form.receiptTotal > 0" class="text-red-600 font-bold flex items-center text-sm bg-red-100 px-3 py-1 rounded-full border border-red-200">
-                                    <i class="fa-solid fa-triangle-exclamation mr-2"></i> Lệch tiền
-                                </span>
-                            </div>
-                        </div>
+            <div class="w-2/5 bg-black flex flex-col relative border-r border-slate-500">
+                <div class="flex-1 overflow-auto custom-scrollbar flex items-start justify-center p-2" ref="imgContainer">
+                    <div v-if="!imageSrc" class="mt-20 border-2 border-dashed border-slate-600 rounded-lg p-10 text-center text-slate-500">
+                        <i class="fa-solid fa-image text-4xl mb-2"></i>
+                        <p>Dán hoặc chọn ảnh biên lai</p>
+                        <input type="file" @change="handleFileUpload" accept="image/*" class="mt-4 block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-700 file:text-white hover:file:bg-slate-600 cursor-pointer">
                     </div>
+                    <img v-else :src="imageSrc" ref="receiptImg" class="zoom-img shadow-lg" 
+                         @mousemove="handleZoom" @mouseleave="resetZoom" alt="Receipt">
                 </div>
-
-                <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-6 shadow-sm">
-                    <h3 class="text-xs font-bold text-gray-600 uppercase mb-3 flex items-center">
-                        <i class="fa-solid fa-file-invoice mr-2"></i> Nội dung & Người nhận
-                    </h3>
-                    <div class="grid grid-cols-12 gap-4">
-                        <div class="col-span-12">
-                            <label class="block text-[10px] text-gray-400 font-bold mb-1">Nội dung ghi trên biên lai (Raw):</label>
-                            <textarea class="w-full text-xs p-2 border rounded bg-white text-gray-600 italic h-12" placeholder="VD: con cu 50k, ca trang 50..."></textarea>
-                        </div>
-                        <div class="col-span-4">
-                            <label class="block text-[10px] font-bold text-gray-500">Tên người nhận</label>
-                            <input v-model="form.receiverName" class="w-full p-2 text-xs border rounded bg-white font-medium" placeholder="Tên chủ TK">
-                        </div>
-                        <div class="col-span-4">
-                            <label class="block text-[10px] font-bold text-gray-500">Số tài khoản</label>
-                            <input v-model="form.receiverAcc" class="w-full p-2 text-xs border rounded bg-white font-mono" placeholder="STK">
-                        </div>
-                        <div class="col-span-4">
-                            <label class="block text-[10px] font-bold text-gray-500">Ngân hàng</label>
-                            <input v-model="form.receiverBank" class="w-full p-2 text-xs border rounded bg-white" placeholder="VD: MB, VCB">
-                        </div>
-                    </div>
+                <div v-if="imageSrc" class="bg-slate-900/80 text-white text-[10px] p-1 text-center absolute bottom-0 w-full">
+                    Di chuột để phóng to chi tiết
                 </div>
+            </div>
 
-                <div class="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    <div class="bg-indigo-600 text-white px-4 py-2 text-xs font-bold uppercase flex justify-between items-center">
-                        <span><i class="fa-solid fa-list-ol mr-2"></i> Chi tiết đặt cược</span>
-                        <span>Tổng cược: {{ sumBets.toLocaleString('vi-VN') }} ₫</span>
-                    </div>
-                    
-                    <table class="w-full text-sm">
-                        <thead class="bg-gray-100 text-gray-500 text-[11px] uppercase">
-                            <tr>
-                                <th class="p-3 text-left w-12">Mã</th>
-                                <th class="p-3 text-left">Tên (Thường / Huý)</th>
-                                <th class="p-3 text-right">Tiền (k)</th>
-                                <th class="p-3 text-right">Thành tiền</th>
-                                <th class="p-3 text-center w-10"></th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100 bg-white">
-                            <tr v-for="(bet, index) in form.bets" :key="index" class="hover:bg-indigo-50 transition">
-                                <td class="p-3 font-bold text-indigo-600 text-center border-r">{{ bet.code }}</td>
-                                <td class="p-3">
-                                    <span class="font-bold text-gray-800">{{ bet.common }}</span>
-                                    <span class="text-xs text-gray-400 ml-2">({{ bet.alias }})</span>
-                                </td>
-                                <td class="p-3 text-right">
-                                    <input type="number" v-model="bet.amount_k" class="w-16 text-right p-1 border rounded font-mono text-sm focus:border-indigo-500 focus:bg-white bg-gray-50">
-                                </td>
-                                <td class="p-3 text-right font-mono font-medium">
-                                    {{ (bet.amount_k * 1000).toLocaleString('vi-VN') }}
-                                </td>
-                                <td class="p-3 text-center">
-                                    <button @click="removeBet(index)" class="text-gray-300 hover:text-red-500"><i class="fa-solid fa-times"></i></button>
-                                </td>
-                            </tr>
-                            <tr v-if="form.bets.length === 0">
-                                <td colspan="5" class="py-8 text-center text-gray-400 text-xs italic">
-                                    Chưa có dữ liệu. Chọn con vật bên dưới.
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="mt-4">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase mb-2">Thêm nhanh con vật:</p>
-                    <div class="grid grid-cols-6 sm:grid-cols-9 gap-1">
-                         <button v-for="animal in animalDb" :key="animal.code" @click="addBet(animal)" 
-                            class="bg-white border hover:border-indigo-500 hover:bg-indigo-50 rounded py-1 px-1 flex flex-col items-center transition">
-                            <span class="font-bold text-[10px] text-indigo-800">{{ animal.code }}</span>
-                            <span class="text-[9px] text-gray-600 truncate w-full text-center">{{ animal.common }}</span>
+            <div class="w-3/5 bg-slate-100 flex flex-col h-full relative">
+                
+                <div class="bg-white p-3 shadow-sm border-b z-10 shrink-0">
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                        <i class="fa-solid fa-wand-magic-sparkles text-purple-600 mr-1"></i>
+                        1. Dán nội dung text từ ảnh/tin nhắn để tự động bóc tách:
+                    </label>
+                    <div class="flex gap-2">
+                        <input v-model="rawInput" @keyup.enter="parseRawInput"
+                            class="flex-1 border border-slate-300 rounded px-3 py-2 text-sm focus:border-purple-500 focus:outline-none shadow-inner" 
+                            placeholder="Ví dụ: Tran Van A chuyen 200k, con cu 50, ca trang 150...">
+                        <button @click="parseRawInput" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded font-bold text-sm shadow">
+                            Phân Tích
                         </button>
                     </div>
                 </div>
-            </div>
 
-            <div class="absolute bottom-0 left-0 right-0 bg-white border-t p-4 shadow-lg z-30 flex gap-3 items-center">
-                <div class="flex-1">
-                    <div class="text-[10px] text-gray-500 font-bold uppercase">Chênh lệch đối chiếu</div>
-                    <div class="text-xl font-black" :class="diff === 0 ? 'text-green-600' : 'text-red-600'">
-                        {{ diff > 0 ? '+' : '' }}{{ diff.toLocaleString('vi-VN') }} ₫
+                <div class="flex-1 overflow-y-auto custom-scrollbar p-4 pb-20">
+                    
+                    <div class="bg-white rounded-lg shadow-sm border border-slate-200 mb-4 overflow-hidden">
+                        <div class="bg-slate-50 px-4 py-2 border-b flex justify-between items-center">
+                            <h3 class="font-bold text-sm text-slate-700 uppercase">2. Kiểm tra thông tin chung</h3>
+                            <span class="text-[10px] text-red-500 italic">* Tích vào ô vuông để xác nhận đúng</span>
+                        </div>
+                        <div class="p-4 grid grid-cols-12 gap-4 text-sm">
+                            
+                            <div class="col-span-6">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase">Người chuyển</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="checkbox" v-model="checks.sender" title="Xác nhận tên đúng">
+                                    <input v-model="form.senderName" class="flex-1 p-2 border rounded font-semibold text-slate-700" placeholder="Họ tên khách">
+                                </div>
+                            </div>
+
+                            <div class="col-span-6">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase">Ngày giờ chuyển</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="checkbox" v-model="checks.date" title="Xác nhận ngày giờ đúng">
+                                    <input type="datetime-local" v-model="form.transDate" class="flex-1 p-2 border rounded">
+                                </div>
+                            </div>
+
+                            <div class="col-span-6">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase">Tổng tiền biên lai</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="checkbox" v-model="checks.total" title="Xác nhận số tiền đúng">
+                                    <div class="relative flex-1">
+                                        <input type="text" :value="formatCurrency(form.receiptTotal)" @input="updateTotal" 
+                                            class="w-full p-2 border rounded font-bold text-red-600 text-right pr-8 bg-red-50" placeholder="0">
+                                        <span class="absolute right-2 top-2 text-xs font-bold text-red-300">₫</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-span-6">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase">Vào TK Người nhận</label>
+                                <div class="flex gap-1">
+                                    <input v-model="form.receiverBank" class="w-1/3 p-2 border rounded text-xs" placeholder="Ngân hàng">
+                                    <input v-model="form.receiverName" class="flex-1 p-2 border rounded text-xs" placeholder="Tên chủ TK">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-sm border border-slate-200 mb-4">
+                        <div class="bg-blue-50 px-4 py-2 border-b flex justify-between items-center">
+                            <h3 class="font-bold text-sm text-blue-800 uppercase">3. Chi tiết đặt cược ({{ form.bets.length }} mã)</h3>
+                            <div class="text-xs">
+                                Tổng cược: <span class="font-bold text-blue-700 text-base">{{ sumBets.toLocaleString('vi-VN') }} ₫</span>
+                            </div>
+                        </div>
+                        
+                        <table class="w-full text-sm">
+                            <thead class="bg-slate-50 text-slate-500 text-[11px] uppercase border-b">
+                                <tr>
+                                    <th class="p-2 text-left w-10">Mã</th>
+                                    <th class="p-2 text-left">Con Vật (Tên gọi)</th>
+                                    <th class="p-2 text-right w-24">Số (k)</th>
+                                    <th class="p-2 text-right w-28">Thành tiền</th>
+                                    <th class="p-2 w-8"></th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y">
+                                <tr v-for="(bet, index) in form.bets" :key="index" class="hover:bg-blue-50">
+                                    <td class="p-2 text-center font-bold text-blue-600 border-r">{{ bet.code }}</td>
+                                    <td class="p-2 font-medium text-slate-700">
+                                        {{ bet.common }} 
+                                        <span v-if="bet.alias" class="text-xs text-slate-400 italic">({{ bet.alias }})</span>
+                                    </td>
+                                    <td class="p-2">
+                                        <input type="number" v-model="bet.amount_k" class="w-full text-right p-1 border rounded font-mono focus:bg-white bg-slate-50 focus:border-blue-500 outline-none">
+                                    </td>
+                                    <td class="p-2 text-right font-mono text-slate-600">
+                                        {{ (bet.amount_k * 1000).toLocaleString('vi-VN') }}
+                                    </td>
+                                    <td class="p-2 text-center">
+                                        <button @click="removeBet(index)" class="text-slate-300 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="p-2 bg-slate-50 border-t">
+                            <div class="grid grid-cols-9 gap-1 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
+                                <button v-for="animal in animalDb" :key="animal.code" @click="addBet(animal)" 
+                                    class="bg-white border hover:border-blue-500 hover:bg-blue-100 rounded py-1 flex flex-col items-center">
+                                    <span class="text-[10px] font-bold text-slate-600">{{ animal.code }}</span>
+                                    <span class="text-[9px] text-slate-500 truncate w-11/12 text-center">{{ animal.common }}</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                
-                <button @click="simulateOCR" class="bg-yellow-100 text-yellow-800 px-3 py-2 rounded text-xs font-bold border border-yellow-300 hover:bg-yellow-200">
-                    <i class="fa-solid fa-robot"></i> Test OCR
-                </button>
 
-                <button @click="downloadExcel" :disabled="diff !== 0" 
-                    class="bg-indigo-700 hover:bg-indigo-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-bold shadow-lg flex items-center gap-2 transition-all w-1/2 justify-center">
-                    <i class="fa-solid fa-file-export"></i> 
-                    <span>XÁC NHẬN</span>
-                </button>
+                <div class="absolute bottom-0 left-0 right-0 bg-white border-t p-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-30">
+                    <div class="flex justify-between items-center mb-3">
+                        <div class="flex items-center gap-4">
+                            <div>
+                                <div class="text-[10px] font-bold text-slate-400 uppercase">Trạng thái tiền</div>
+                                <div class="font-black text-xl" :class="diff === 0 ? 'text-green-600' : 'text-red-600'">
+                                    {{ diff > 0 ? '+' : '' }}{{ diff.toLocaleString('vi-VN') }} ₫
+                                </div>
+                            </div>
+                            <div v-if="diff === 0 && !isAllChecked" class="text-xs text-orange-600 font-bold bg-orange-100 px-2 py-1 rounded animate-pulse">
+                                <i class="fa-solid fa-triangle-exclamation mr-1"></i> Vui lòng tích xác nhận thông tin!
+                            </div>
+                        </div>
+
+                        <button @click="downloadExcel" :disabled="diff !== 0 || !isAllChecked" 
+                            class="bg-blue-700 hover:bg-blue-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-8 py-3 rounded-lg font-bold shadow-lg flex items-center gap-2 transition-all">
+                            <i class="fa-solid fa-file-export"></i> 
+                            <span>LƯU DỮ LIỆU</span>
+                        </button>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 
     <script>
         const { createApp } = Vue;
-        
-        // DỮ LIỆU SEED (Rút gọn cho demo, thực tế cần đủ 36 con)
+
+        // DỮ LIỆU 36 CON (Full Data với các biến thể Alias để Regex bắt)
         const ANIMAL_DB = [
-            {code:'01', alias:'Chiếm Khôi', common:'Cá Trắng'}, {code:'02', alias:'Bản Quế', common:'Con Ốc'},
-            {code:'03', alias:'Vinh Sanh', common:'Con Ngỗng'}, {code:'10', alias:'Giang Từ', common:'Rồng Bay'},
-            {code:'18', alias:'Khổng Minh', common:'Con Cọp'}, {code:'22', alias:'Song Đồng', common:'Con Cu'},
-            {code:'36', alias:'An Sỹ', common:'Con Yêu'}
+            {code:'01', common:'Cá Trắng', keywords:['ca trang', 'catrang', 'chiem khoi', 'trang', '01']},
+            {code:'02', common:'Con Ốc', keywords:['con oc', 'conoc', 'ban que', 'oc', '02']},
+            {code:'03', common:'Con Ngỗng', keywords:['con ngong', 'ngong', 'vinh sanh', '03']},
+            {code:'04', common:'Con Công', keywords:['con cong', 'cong', 'yen the', '04']},
+            {code:'05', common:'Con Trùng', keywords:['con trung', 'trung', 'chi cao', '05']},
+            {code:'06', common:'Con Gà', keywords:['con ga', 'ga', 'phu qui', '06']},
+            {code:'07', common:'Con Heo', keywords:['con heo', 'heo', 'huu dung', '07']},
+            {code:'08', common:'Con Dương', keywords:['con duong', 'duong', 'thai binh', '08']},
+            {code:'09', common:'Con Trâu', keywords:['con trau', 'trau', 'thanh thang', '09']},
+            {code:'10', common:'Rồng Bay', keywords:['rong bay', 'rong', 'giang tu', '10']},
+            {code:'11', common:'Con Chó', keywords:['con cho', 'cho', 'ha bao', '11']},
+            {code:'12', common:'Con Ngựa', keywords:['con ngua', 'ngua', 'thanh liem', '12']},
+            {code:'13', common:'Con Voi', keywords:['con voi', 'voi', 'hoa binh', '13']},
+            {code:'14', common:'Con Mèo', keywords:['con meo', 'meo', 'tu hien', '14']},
+            {code:'15', common:'Con Chuột', keywords:['con chuot', 'chuot', 'an khanh', '15']},
+            {code:'16', common:'Con Ong', keywords:['con ong', 'ong', 'nhat son', '16']},
+            {code:'17', common:'Hạc Tiên', keywords:['hac tien', 'hac', 'chi dac', '17']},
+            {code:'18', common:'Con Cọp', keywords:['con cop', 'cop', 'khong minh', '18']},
+            {code:'19', common:'Con Bướm', keywords:['con buom', 'buom', 'vang sanh', '19']},
+            {code:'20', common:'Con Rùa', keywords:['con rua', 'rua', 'nguyen cat', '20']},
+            {code:'21', common:'Con Én', keywords:['con en', 'en', 'thuong chieu', '21']},
+            {code:'22', common:'Con Cu', keywords:['con cu', 'cu', 'chim cu', 'song dong', '22']},
+            {code:'23', common:'Con Khỉ', keywords:['con khi', 'khi', 'phuoc ton', '23']},
+            {code:'24', common:'Con Ếch', keywords:['con ech', 'ech', 'luu bi', '24']},
+            {code:'25', common:'Con Ó', keywords:['con o', 'o', 'thuong cam', '25']},
+            {code:'26', common:'Rồng Nước', keywords:['rong nuoc', 'ha dong', '26']},
+            {code:'27', common:'Con Quy', keywords:['con quy', 'quy', 'cao sy', '27']},
+            {code:'28', common:'Con Gà', keywords:['con ga', 'bach loi', '28']},
+            {code:'29', common:'Con Lươn', keywords:['con luon', 'luon', 'truc thanh', '29']},
+            {code:'30', common:'Cá Đỏ', keywords:['ca do', 'tinh loi', '30']},
+            {code:'31', common:'Con Tôm', keywords:['con tom', 'tom', 'cam chuong', '31']},
+            {code:'32', common:'Con Rắn', keywords:['con ran', 'ran', 'phung xuan', '32']},
+            {code:'33', common:'Con Nhện', keywords:['con nhen', 'nhen', 'tay phuong', '33']},
+            {code:'34', common:'Con Nai', keywords:['con nai', 'nai', 'thuan loi', '34']},
+            {code:'35', common:'Con Dê', keywords:['con de', 'de', 'vinh thai', '35']},
+            {code:'36', common:'Con Yêu', keywords:['con yeu', 'yeu', 'an sy', '36']}
         ];
 
         createApp({
             data() {
                 return {
                     imageSrc: null,
-                    rotation: 0,
+                    rawInput: '',
                     animalDb: ANIMAL_DB,
+                    checks: { sender: false, date: false, total: false },
                     form: {
                         senderName: '',
-                        transDate: '', // YYYY-MM-DDTHH:mm
+                        transDate: '',
                         receiptTotal: 0,
                         receiverName: '',
                         receiverBank: '',
-                        receiverAcc: '',
-                        bets: []
+                        bets: [] // {code, common, alias, amount_k}
                     }
                 }
             },
             computed: {
                 sumBets() {
-                    return this.form.bets.reduce((acc, bet) => acc + (bet.amount_k || 0) * 1000, 0);
+                    return this.form.bets.reduce((acc, b) => acc + (b.amount_k || 0) * 1000, 0);
                 },
                 diff() {
                     return (this.form.receiptTotal || 0) - this.sumBets;
+                },
+                isAllChecked() {
+                    return this.checks.sender && this.checks.date && this.checks.total;
                 }
             },
             methods: {
-                formatCurrency(value) {
-                    if (!value) return '';
-                    return value.toLocaleString('vi-VN');
-                },
-                updateTotal(event) {
-                    const raw = event.target.value.replace(/[^0-9]/g, '');
-                    this.form.receiptTotal = raw ? parseInt(raw) : 0;
-                },
-                handleFileUpload(event) {
-                    const file = event.target.files[0];
-                    if (file) {
+                handleFileUpload(e) {
+                    const file = e.target.files[0];
+                    if(file) {
                         this.imageSrc = URL.createObjectURL(file);
-                        this.rotation = 0;
-                        this.resetForm();
+                        this.resetChecks();
                     }
                 },
-                rotateImage() {
-                    this.rotation += 90;
+                handleZoom(e) {
+                    const img = this.$refs.receiptImg;
+                    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+                    const x = (e.clientX - left) / width * 100;
+                    const y = (e.clientY - top) / height * 100;
+                    img.style.transformOrigin = `${x}% ${y}%`;
+                    img.style.transform = "scale(2.5)";
                 },
-                resetForm() {
-                    this.form.senderName = '';
-                    this.form.receiptTotal = 0;
-                    this.form.bets = [];
-                    this.form.receiverName = '';
-                    this.form.receiverBank = '';
-                    this.form.receiverAcc = '';
+                resetZoom() {
+                    if(this.$refs.receiptImg) this.$refs.receiptImg.style.transform = "scale(1)";
+                },
+                resetApp() {
+                    this.imageSrc = null;
+                    this.rawInput = '';
+                    this.form = { senderName: '', transDate: '', receiptTotal: 0, receiverName: '', receiverBank: '', bets: [] };
+                    this.resetChecks();
+                },
+                resetChecks() {
+                    this.checks = { sender: false, date: false, total: false };
+                },
+                formatCurrency(val) {
+                    if(!val) return '';
+                    return val.toLocaleString('vi-VN');
+                },
+                updateTotal(e) {
+                    const raw = e.target.value.replace(/[^0-9]/g, '');
+                    this.form.receiptTotal = raw ? parseInt(raw) : 0;
+                    if(this.form.receiptTotal > 0) this.checks.total = true;
+                },
+                addBet(animal, k=0) {
+                    this.form.bets.push({ code: animal.code, common: animal.common, alias: '', amount_k: k });
+                },
+                removeBet(idx) {
+                    this.form.bets.splice(idx, 1);
+                },
+
+                // --- HÀM THÔNG MINH: PHÂN TÍCH TEXT ĐƯỢC PASTE VÀO ---
+                parseRawInput() {
+                    if(!this.rawInput) return;
                     
-                    // Set default date to now
+                    const text = this.rawInput.toLowerCase().replace(/\./g, '').replace(/,/g, ' '); // Xóa dấu chấm, đổi phẩy thành cách
+                    
+                    // 1. Thử tìm tên người chuyển (Giả định: Sau chữ "ck" hoặc đầu câu)
+                    // (Logic đơn giản cho demo)
+                    
+                    // 2. Tìm tiền biên lai (Số to nhất trong chuỗi)
+                    const numbers = text.match(/\d+/g);
+                    if(numbers) {
+                        const maxVal = Math.max(...numbers.map(n => parseInt(n)));
+                        if(maxVal > 10000) this.form.receiptTotal = maxVal; // Nếu > 10k thì khả năng là tổng
+                    }
+
+                    // 3. Tìm bets: Duyệt qua tất cả 36 con
+                    // Logic Regex: Tìm [keyword] + [khoảng trắng/ký tự] + [số]
+                    this.form.bets = [];
+                    
+                    this.animalDb.forEach(animal => {
+                        for(let kw of animal.keywords) {
+                            // Regex: tìm từ khóa (vd: "ca trang") theo sau là số (vd: "50", "50k")
+                            // \b: ranh giới từ
+                            const regex = new RegExp(`${kw}\\s*[:\-]?\\s*(\\d+)(k?)`, 'i');
+                            const match = text.match(regex);
+                            
+                            if(match) {
+                                let val = parseInt(match[1]);
+                                // Xử lý đơn vị: Nếu số < 1000 (vd: 50) -> 50k. Nếu > 1000 (vd: 50000) -> 50k
+                                if(val >= 1000) val = val / 1000;
+                                
+                                this.addBet(animal, val);
+                                break; // Tìm thấy 1 keyword của con này là đủ
+                            }
+                        }
+                    });
+                    
+                    // Auto set date
                     const now = new Date();
                     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
                     this.form.transDate = now.toISOString().slice(0,16);
                 },
-                resetApp() {
-                    this.imageSrc = null;
-                    this.resetForm();
-                },
-                addBet(animal, amount = 0) {
-                    this.form.bets.push({
-                        code: animal.code,
-                        common: animal.common,
-                        alias: animal.alias,
-                        amount_k: amount
-                    });
-                },
-                removeBet(index) {
-                    this.form.bets.splice(index, 1);
-                },
-                
-                // GIẢ LẬP TRÍCH XUẤT OCR (Bao gồm đầy đủ trường bạn yêu cầu)
-                simulateOCR() {
-                    alert("Giả lập AI đọc biên lai...");
-                    
-                    // 1. Trích xuất thông tin chung
-                    this.form.senderName = "TRAN THI THU THUY";
-                    this.form.transDate = "2023-10-25T14:30";
-                    this.form.receiptTotal = 150000;
-                    
-                    // 2. Trích xuất thông tin người nhận (từ nội dung biên lai)
-                    this.form.receiverName = "NGUYEN VAN A";
-                    this.form.receiverBank = "VIETCOMBANK";
-                    this.form.receiverAcc = "9999888877";
-
-                    // 3. Trích xuất nội dung cược
-                    this.form.bets = [];
-                    // Case: Tên huý + Tên thường
-                    this.addBet(this.animalDb.find(a => a.code === '01'), 50); // Chiếm Khôi 50k
-                    this.addBet(this.animalDb.find(a => a.code === '22'), 100); // Con Cu 100k
-                },
 
                 downloadExcel() {
-                    // Xuất Excel với đầy đủ cột theo yêu cầu
-                    let csv = "\uFEFF"; // BOM for Vietnamese characters
-                    csv += "Ngay_Gio_Chuyen,Nguoi_Chuyen,Nguoi_Nhan,Ngan_Hang,STK_Nhan,Tong_Tien,Ma_Con,Ten_Thuong,Ten_Huy,Tien_Cuoc(k),Thanh_Tien\n";
-                    
-                    this.form.bets.forEach(bet => {
-                        const row = [
-                            `"${this.form.transDate.replace('T', ' ')}"`,
-                            `"${this.form.senderName}"`,
-                            `"${this.form.receiverName}"`,
-                            `"${this.form.receiverBank}"`,
-                            `"${this.form.receiverAcc}"`,
-                            this.form.receiptTotal,
-                            `'${bet.code}`,
-                            `"${bet.common}"`,
-                            `"${bet.alias}"`,
-                            bet.amount_k,
-                            bet.amount_k * 1000
-                        ].join(",");
-                        csv += row + "\n";
+                    // Xuất CSV
+                    let csv = "\uFEFFNgay,NguoiChuyen,TongTien,Ma,ConVat,TienCuoc(k),ThanhTien\n";
+                    const dateStr = this.form.transDate.replace('T', ' ');
+                    this.form.bets.forEach(b => {
+                        csv += `"${dateStr}","${this.form.senderName}",${this.form.receiptTotal},'${b.code},"${b.common}",${b.amount_k},${b.amount_k*1000}\n`;
                     });
-
-                    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                    
+                    const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+                    const url = URL.createObjectURL(blob);
                     const link = document.createElement("a");
-                    link.href = URL.createObjectURL(blob);
-                    link.download = `BienLai_${this.form.senderName}_${Date.now()}.csv`;
+                    link.href = url;
+                    link.download = `DoiSoat_${this.form.senderName}.csv`;
                     link.click();
                 }
             }
